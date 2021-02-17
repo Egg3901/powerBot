@@ -10,7 +10,7 @@ TOKEN = os.getenv('DISCORD_TOKEN') #fetches discord token from your environment
 client = discord.Client()
 
 
-@client.event()
+@client.event
 async def on_ready():
     print(f'{client.user} is ready')
 
