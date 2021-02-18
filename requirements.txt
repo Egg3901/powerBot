@@ -9,3 +9,8 @@ six==1.15.0
 toml==0.10.2
 wrapt==1.12.1
 
+
+discord~=1.0.1
+requests~=2.25.1
+matplotlib~=3.3.4
+beautifulsoup4~=4.9.3
