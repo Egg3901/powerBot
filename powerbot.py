@@ -7,11 +7,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')  # fetches discord token from your environment
-username = os.getenv("USER")
-password = os.getenv("PASS")
+
 
 client = discord.Client()
 pb = commands.Bot(command_prefix=['!', '.'])
+
 """The cogs to be loaded by the bot"""
 cogs = [
         'race_tracker'
