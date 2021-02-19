@@ -8,6 +8,65 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
 client = discord.Client()
+us_state_abbrev = {
+    'Alabama': 'AL',
+    'Alaska': 'AK',
+    'American Samoa': 'AS',
+    'Arizona': 'AZ',
+    'Arkansas': 'AR',
+    'California': 'CA',
+    'Colorado': 'CO',
+    'Connecticut': 'CT',
+    'Delaware': 'DE',
+    'District of Columbia': 'DC',
+    'Florida': 'FL',
+    'Georgia': 'GA',
+    'Guam': 'GU',
+    'Hawaii': 'HI',
+    'Idaho': 'ID',
+    'Illinois': 'IL',
+    'Indiana': 'IN',
+    'Iowa': 'IA',
+    'Kansas': 'KS',
+    'Kentucky': 'KY',
+    'Louisiana': 'LA',
+    'Maine': 'ME',
+    'Maryland': 'MD',
+    'Massachusetts': 'MA',
+    'Michigan': 'MI',
+    'Minnesota': 'MN',
+    'Mississippi': 'MS',
+    'Missouri': 'MO',
+    'Montana': 'MT',
+    'Nebraska': 'NE',
+    'Nevada': 'NV',
+    'New Hampshire': 'NH',
+    'New Jersey': 'NJ',
+    'New Mexico': 'NM',
+    'New York': 'NY',
+    'North Carolina': 'NC',
+    'North Dakota': 'ND',
+    'Northern Mariana Islands':'MP',
+    'Ohio': 'OH',
+    'Oklahoma': 'OK',
+    'Oregon': 'OR',
+    'Pennsylvania': 'PA',
+    'Puerto Rico': 'PR',
+    'Rhode Island': 'RI',
+    'South Carolina': 'SC',
+    'South Dakota': 'SD',
+    'Tennessee': 'TN',
+    'Texas': 'TX',
+    'Utah': 'UT',
+    'Vermont': 'VT',
+    'Virgin Islands': 'VI',
+    'Virginia': 'VA',
+    'Washington': 'WA',
+    'West Virginia': 'WV',
+    'Wisconsin': 'WI',
+    'Wyoming': 'WY'
+}
+abbrev_us_state = dict(map(reversed, us_state_abbrev.items()))
 
 
 def parse_race_data(race_data):
@@ -94,6 +153,7 @@ def update_stats(race_parties):
                'Change in polling']
     row_labels = []
     data = []
+    party_colors = []
     current_total, prev_total, current_values, current_labels = update_current_total_gain(race_parties)
     for party in race_parties:
         vote_totals1 = race_parties[str(party)]
@@ -108,9 +168,21 @@ def update_stats(race_parties):
         polling_change = round((float(formatted_propgain) - float(previous_polling)), 3)
         data.append([vval2, vval1, gain, formatted_propgain, previous_polling, polling_change])
         row_labels.append(party_name)
+        colors = {
+            "United Labor Party": '#961E28',
+            "Libertarian Party": '#FFD700',
+            "Democratic Party": '#1C7EFF',
+            'Bull Moose Populist Party': '#64024F'
+
+        }
+        if party_name in colors.keys():
+            color = colors[party_name]
+        else:
+            color = '#808080'
+        party_colors.append(color)
 
     print(row_labels)
-    return data, row_labels, current_values, current_labels
+    return data, row_labels, current_values, current_labels, party_colors
 
 
 def load_race_data(data_path):
@@ -185,23 +257,24 @@ class RaceTracker(commands.Cog):
 
     @pb.command(pass_context=True, aliases=["add"])
     @commands.has_any_role("Strategist", "Bot Master", "Verified", "Politburo Member", "Internal Affairs Chair")
-    async def addstate(self, ctx, state):
-        """Adds a state to the list of states being scraped, takes 20 full minutes or two ten minute update cycles to show results. Whichever comes sooner. """
+    async def add_state(self, ctx, state):
+        """Adds a state to the list of states being scraped, takes 20 full minutes or two ten minute update cycles to
+        show results. Whichever comes sooner. """
         update_states(state)
         embed = discord.Embed(title="Added state!", description=f"Succesfully added the state {state}!", color=0x00bfff)
         await ctx.send(embed=embed)
 
     @pb.command(pass_context=True, aliases=["rem"])
-    @commands.has_any_role("Strategist", "Bot Master", "Verified", "Politburo Member", "Internal Affairs Chair")
-    async def removestate(self, ctx, state):
-        """Removes a state from the list of states being scraped. Data will remain available & accessible through updateraces until overwritten or manually deleted."""
+    async def remove_state(self, ctx, state):
+        """Removes a state from the list of states being scraped. Data will remain available & accessible through update
+        races until overwritten or manually deleted."""
         remove_states(state)
         embed = discord.Embed(title="Remove state!", description=f"Succesfully removed the state {state}!", color=0x00bfff)
         await ctx.send(embed=embed)
 
-    @pb.command(pass_context=True,aliases=["ur"])
-    @commands.has_any_role("Strategist", "Bot Master", "Verified", "Politburo Member", "Internal Affairs Chair")
-    async def updaterace(self, ctx, state):
+    @pb.command(pass_context=True,aliases=["ur", "upd", "check"])
+    @commands.has_any_role("Strategist", "Bot Master", "Verified", "Politburo Member", "International Affairs Chair")
+    async def update_race(self, ctx, state):
         """This command checks the status of a state's polling. The state must be in the tracking list and needs
          two CORRECTLY SCRAPED updates. If they are not displaying properly or display no change, that update was likely
          lost due to lag.
@@ -211,19 +284,24 @@ class RaceTracker(commands.Cog):
             loaded_data = load_race_data(data_path)
             race_parties, race_times, race_votes = parse_race_data(loaded_data)
             print(str(race_parties))
-            race_data, row_labels, current_polling, current_labels = update_stats(race_parties)
+            race_data, row_labels, current_polling, current_labels, party_colors = update_stats(race_parties)
 
             n = 0
             update_time = time.ctime(os.path.getmtime(data_path))
+            state_abv = state[:-2]
+            full_state_name = abbrev_us_state[state_abv]
+            race_name = state[2:].upper()
             embed = discord.Embed(
-                title=f"{state}",
-                description=f"You've queried for information on {state}, last updated {update_time}!",
-                color=0x00bfff
+                title=f"{full_state_name} - {race_name}",
+                description=f"You've queried for information on [{full_state_name}](https://oppressive.games/power/state"
+                            f".php?state={state_abv}), last updated {update_time}!",
+                color=0x961E28
             )
             f = plt.Figure(figsize=(5, 2))
             current = f.add_subplot(111)
-            current.pie(current_polling, labels=current_labels, autopct='%1.1f%%')
-            current.set_title("Last Update")
+            current.pie(current_polling, labels=current_labels, autopct='%1.1f%%',colors=party_colors)
+            current.set_title(f"Last Update - {full_state_name} - {race_name}")
+            f.tight_layout()
             f.savefig('currentgraph.png')
             for row in row_labels:
                 cd = race_data[n] # candidate data
@@ -241,7 +319,12 @@ class RaceTracker(commands.Cog):
             await ctx.send(embed=embed)
             await ctx.send(file=chart)
         except Exception as e:
-            print(f"An error occurred {e}!")
+            embed = discord.Embed(
+                title="An error occurred!",
+                description=f"Unfortunately an error has occurred: {e}!",
+                color=0x961E28
+            )
+            await ctx.send(embed=embed)
             raise e
 
 

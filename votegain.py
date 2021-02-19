@@ -32,7 +32,7 @@ def update_population():
         print('error during login')
         print(str(e))
     for state in states_to_update:
-        if state in ["AK", "AL", "NM", "HI", "NH", "ME"]:
+        if state in ["AK", "AL", "NM", "HI", "NH", "ME", "WY", "MT"]:
             index_search = {
                 "s1": 4,
                 "s2": 5

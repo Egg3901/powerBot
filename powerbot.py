@@ -11,7 +11,6 @@ TOKEN = os.getenv('DISCORD_TOKEN')  # fetches discord token from your environmen
 
 client = discord.Client()
 pb = commands.Bot(command_prefix=['!', '.'])
-
 """The cogs to be loaded by the bot"""
 cogs = [
         'race_tracker'
@@ -21,7 +20,7 @@ cogs = [
 @pb.event
 async def on_ready():
     """This event triggers on client connection to discord"""
-    print(f'{client.user} is ready')
+    print(f'{pb.user} is ready')
     await pb.change_presence(activity=discord.Game(name="Socialism is when the government does stuff"))
 if __name__ == '__main__':
     for cog in cogs:
