@@ -4,7 +4,6 @@ import os.path, time
 from discord.ext.commands import Bot
 import json
 import matplotlib.pyplot as plt
-
 from matplotlib.figure import Figure
 
 client = discord.Client()
@@ -194,15 +193,17 @@ def load_race_data(data_path):
     return race_data
 
 
-def generate_graph(columns, data, outputpath):
-
-    f = Figure(figsize=(9, 1.9))
-
-    stats = f.add_subplot()
-    stats.table(cellText=data, colLabels=columns, rowLabels=row_labels, loc='center')
-    stats.xaxis.set_visible(False)
-    stats.yaxis.set_visible(False)
-    stats.set_title("General Statistics")
+# def generate_graph(columns, data, outputpath): ### currently unused! would represent the data displayed in the embed i
+# a tabular format
+#
+#     f = Figure(figsize=(9, 1.9))
+#
+#     stats = f.add_subplot()
+#     stats.table(cellText=data, colLabels=columns, rowLabels=row_labels, loc='center')
+#     stats.xaxis.set_visible(False)
+#     stats.yaxis.set_visible(False)
+#     stats.set_title("General Statistics")
+#
 
 def update_states(state):
     """This function loads the json settings file, adds a state, and dumps the file back to json."""

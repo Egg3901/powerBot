@@ -25,3 +25,5 @@ discord~=1.0.1
 requests~=2.25.1
 matplotlib~=3.3.4
 beautifulsoup4~=4.9.3
+lxml~=4.6.2
+tinydb~=4.4.0
