@@ -5,67 +5,9 @@ from discord.ext.commands import Bot
 import json
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
+from common_functions import us_state_abbrev, index_state, power_url, scrape, login_to_power, msgs
 
 client = discord.Client()
-us_state_abbrev = {
-    'Alabama': 'AL',
-    'Alaska': 'AK',
-    'American Samoa': 'AS',
-    'Arizona': 'AZ',
-    'Arkansas': 'AR',
-    'California': 'CA',
-    'Colorado': 'CO',
-    'Connecticut': 'CT',
-    'Delaware': 'DE',
-    'District of Columbia': 'DC',
-    'Florida': 'FL',
-    'Georgia': 'GA',
-    'Guam': 'GU',
-    'Hawaii': 'HI',
-    'Idaho': 'ID',
-    'Illinois': 'IL',
-    'Indiana': 'IN',
-    'Iowa': 'IA',
-    'Kansas': 'KS',
-    'Kentucky': 'KY',
-    'Louisiana': 'LA',
-    'Maine': 'ME',
-    'Maryland': 'MD',
-    'Massachusetts': 'MA',
-    'Michigan': 'MI',
-    'Minnesota': 'MN',
-    'Mississippi': 'MS',
-    'Missouri': 'MO',
-    'Montana': 'MT',
-    'Nebraska': 'NE',
-    'Nevada': 'NV',
-    'New Hampshire': 'NH',
-    'New Jersey': 'NJ',
-    'New Mexico': 'NM',
-    'New York': 'NY',
-    'North Carolina': 'NC',
-    'North Dakota': 'ND',
-    'Northern Mariana Islands':'MP',
-    'Ohio': 'OH',
-    'Oklahoma': 'OK',
-    'Oregon': 'OR',
-    'Pennsylvania': 'PA',
-    'Puerto Rico': 'PR',
-    'Rhode Island': 'RI',
-    'South Carolina': 'SC',
-    'South Dakota': 'SD',
-    'Tennessee': 'TN',
-    'Texas': 'TX',
-    'Utah': 'UT',
-    'Vermont': 'VT',
-    'Virgin Islands': 'VI',
-    'Virginia': 'VA',
-    'Washington': 'WA',
-    'West Virginia': 'WV',
-    'Wisconsin': 'WI',
-    'Wyoming': 'WY'
-}
-abbrev_us_state = dict(map(reversed, us_state_abbrev.items()))
 
 
 def parse_race_data(race_data):
@@ -215,6 +157,7 @@ def update_states(state):
     with open('data/settings/settings.json', "w+") as f:
         json.dump(settings_json, f)
 
+
 def remove_states(state):
     """This function loads the json settings file, removes a state, and dumps the file back to json."""
     with open('data/settings/settings.json', "r") as f:
@@ -224,6 +167,63 @@ def remove_states(state):
     settings_json["states"] = states_to_load
     with open('data/settings/settings.json', "w+") as f:
         json.dump(settings_json, f)
+
+def parse_seat_count(soup, index):
+    election_table = soup.findAll("div", {"class": "card-body"})[index]
+    election_table_rows = election_table.findAll("tr")
+    rem_time = election_table.find_all("font")
+    rem_time = rem_time[0].text
+    rem_time_format = rem_time[:-6][12:]
+
+
+check_region = {
+        {"China": ["Zhongnan", "Hong Kong", "Xibei", "Xinan"]}
+    }
+
+
+def tally_seats(soup, index, intent="global"):
+    election_table = soup.findAll("div", {"class": "card-body"})[index]
+    election_table_rows = election_table.findAll("tr")
+    rem_time = election_table.find_all("font")
+    rem_time = rem_time[0].text
+    rem_time_format = rem_time[:-6][12:]
+    update_results = {rem_time_format: {}}
+    print(str(update_results))
+    if intent == "global":
+        """Checks if the country is the US or another country"""
+        for row in election_table_rows:
+            if "Votes" in str(row):
+                row_data = row.find_all("td")
+                votes = row_data[2].text
+                name = row_data[0].text
+                party = row_data[1].text
+                vote_list = votes.split()
+                percent = str(vote_list[0]).replace(",", "")
+                update_results[rem_time_format] = {"party": party, "name": name, "voters": voters,
+                                                   "percent": percent}
+        else:
+            pass
+
+    print(update_results)
+    return update_results
+
+
+def check_seat_count(country, bicameral=False):
+    seat_totals = {}
+    if bicameral is False:
+        index = index_state(country, "legislature")
+        regions = check_region[country]
+        for region in regions:
+            soup = scrape(f'{power_url}/state.php?state={region}')
+            seats = tally_seats(soup, index, intent="Global")
+            seat_totals[f"{country}"] = seats
+    else:
+        pass
+
+    embed = msgs(title=f"Parliamentary Elections in {country}!", message=f"{seat_totals}")
+    return embed
+
+
 
 class RaceTracker(commands.Cog):
 
@@ -235,6 +235,14 @@ class RaceTracker(commands.Cog):
         """
 
     pb = commands.Bot(command_prefix=['!', '.'])
+
+    @pb.command(pass_context=True)
+    @commands.has_any_role("Strategist", "Bot Master", "Verified", "Politburo Member", "Internal Affairs Chair")
+    async def check_seat_count(self, ctx, region):
+        regions =  check_region(region)
+        embed = check_seat_count(region, bicameral=False)
+        ctx.send(embed=embed)
+
 
     @pb.command(pass_context=True, aliases=["state"])
     @commands.has_any_role("Strategist", "Bot Master", "Verified", "Politburo Member", "Internal Affairs Chair")

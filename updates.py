@@ -1,4 +1,4 @@
-from votegain import update_population
+from votegain import *
 import time
 
 

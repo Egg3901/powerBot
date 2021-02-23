@@ -1,7 +1,7 @@
 from discord.ext import commands
-from commonFunctions import power_url
+from common_functions import power_url
 from dotenv import load_dotenv
-from commonFunctions import *
+from common_functions import *
 import discord
 import random
 
@@ -28,8 +28,8 @@ class Profiles(commands.Cog):
             !profile -> fetches your own profile (if registered)
             !profile <id> fetches the profile of a given id
             !profile <link> fetches the profile of a given link     not implemented
-            !profile <name> fetches profile by name
-            !profile <mention> fetches profile by mention
+            !profile <name> fetches profile by name not implemented
+            !profile <mention> fetches profile by mention not implemented
         """
         if user_parameter is None:
             print('id is none')
@@ -41,7 +41,7 @@ class Profiles(commands.Cog):
         else:
             pid = user_parameter
         print(pid)
-        login_to_power(login_data, f"{power_url}/login.php")
+        login_to_power(f"{power_url}/login.php")
         profile_url = f"{power_url}pol.php?pol={pid}"
         profile_page = scrape(profile_url)
         embed = parse_profile_information(profile_page, profile_url)

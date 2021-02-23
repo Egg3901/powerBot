@@ -1,1 +1,8 @@
-{"race": "s1", "multi-state": "True", "state": "FL", "states": [], "output": "results", "testing": "False"}
+{
+  "race": "legislature",
+  "multi-state": "True",
+  "state": "Zhongnan",
+  "elections": [{"region":"Zhongnan","race":"legislature"} ],
+  "output": "results",
+  "testing": "False"
+}
