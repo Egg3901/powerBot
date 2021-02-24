@@ -5,7 +5,8 @@ from discord.ext.commands import Bot
 import json
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from common_functions import us_state_abbrev, index_state, power_url, scrape, login_to_power, msgs
+from common_functions import index_state, power_url, scrape, login_to_power, msgs
+from region_conversion import us_state_convert, cn_state_convert, us_state_abbreviations_list
 
 client = discord.Client()
 
@@ -176,9 +177,6 @@ def parse_seat_count(soup, index):
     rem_time_format = rem_time[:-6][12:]
 
 
-check_region = {
-        {"China": ["Zhongnan", "Hong Kong", "Xibei", "Xinan"]}
-    }
 
 
 def tally_seats(soup, index, intent="global"):
@@ -283,21 +281,38 @@ class RaceTracker(commands.Cog):
 
     @pb.command(pass_context=True,aliases=["ur", "upd", "check"])
     @commands.has_any_role("Strategist", "Bot Master", "Verified", "Politburo Member", "International Affairs Chair")
-    async def update_race(self, ctx, state):
+    async def update_race(self, ctx, state, race=None):
         """This command checks the status of a state's polling. The state must be in the tracking list and needs
          two CORRECTLY SCRAPED updates. If they are not displaying properly or display no change, that update was likely
          lost due to lag.
          """
+
+        def load_race_json(filename):
+            data_path = f'data/results/{filename}.json'
+            loaded_json = load_race_json(data_path)
+            return loaded_json
+
+        def check_state_race_type(state, race):
+
+            def check_state(s):
+                us_states = us_state_abbreviations_list()
+                if s.lower() in  [x.lower() for x in us_states]:
+                    return race_index {
+                        "s1":
+                    }
+            race_index= check_state(state)
+            if race is not None:
+
+
         try:
-            data_path = f'data/results/{state}.json'
-            loaded_data = load_race_data(data_path)
-            race_parties, race_times, race_votes = parse_race_data(loaded_data)
-            print(str(race_parties))
+            loaded_state_json = load_race_json(state)
+            race_parties, race_times, race_votes = parse_race_data(loaded_state_json)
             race_data, row_labels, current_polling, current_labels, party_colors = update_stats(race_parties)
 
             n = 0
             update_time = time.ctime(os.path.getmtime(data_path))
             state_abv = state[:-2]
+            us_state_abbrev, abbrev_us_state = us_state_convert()
             full_state_name = abbrev_us_state[state_abv]
             race_name = state[2:].upper()
             embed = discord.Embed(
