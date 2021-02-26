@@ -8,6 +8,9 @@ import json
 from datetime import datetime
 from dotenv import load_dotenv
 
+from common.region_conversion import us_state_abbreviations_list, us_state_names_list, us_state_convert, \
+    cn_state_abbreviations_list, cn_state_convert, cn_state_names_list
+
 load_dotenv()
 
 power_url = "https://oppressive.games/power/"
@@ -21,7 +24,7 @@ date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
 
 
 def load_settings():
-    with open('data/settings/settings.json', "r") as f:
+    with open('../data/settings/settings.json', "r") as f:
         settings = json.load(f)
     return settings
 
@@ -54,26 +57,56 @@ def login_to_power(p_url):
     return session
 
 
-def index_state(state, race):
-    """Categorizes states by whether they have a governor/legislature or not"""
-    if state in ["USA", "AK", "AL", "NM", "HI", "NH", "ME", "WY", "MT"]:
-        index_search = {
-            "s1": 4,
-            "s2": 5
-        }
+def parse_state_parameters(state, race=None):
+    us_states = us_state_abbreviations_list()
+    us_state_names = us_state_names_list()
+    if race is None:
+        cn_states = cn_state_abbreviations_list()
+        cn_states_names = cn_state_names_list()
 
-    elif state in ["China", "Zhongnan", "Huabei"]:
-        index_search = {
-            "legislature": 3
-        }
+        if state.lower() in [x.lower() for x in cn_states_names]:
+            """Lowers the state name and checks against list of full state names"""
+            index = 3
+            return index
+
+        if state.lower() in [x.lower() for x in cn_states]:
+            index = 3
+            return index
+
+        else:
+            index = 0
+            return index
+
     else:
-        index_search = {
-            "s1": 6,
-            "s2": 7,
-            "gov": 9
-        }
-    index = index_search[race]
-    return index
+        try:
+            us_state_abbrev, abbrev_us_state = us_state_convert()
+            state = us_state_abbrev[state]
+        except KeyError as e:
+            pass
+
+        if state.lower() in [x.lower() for x in us_states]:
+            if state in ["AK", "AL", "NM", "HI", "NH", "ME", "WY", "MT"]:
+                index_search = {
+                    "s1": 4,
+                    "s2": 5
+                }
+                index = index_search[race]
+                return index
+            else:
+                index_search = {
+                    "s1": 6,
+                    "s2": 7,
+                    "gov": 9
+                }
+                index = index_search[race]
+                return index
+
+        else:
+            index = 0
+            return index
+
+
+
 
 
 def scrape(url):

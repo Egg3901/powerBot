@@ -69,6 +69,26 @@ def us_state_abbreviations_list():
               "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
     return states
 
+def us_state_names_list():
+    states = ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+     "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois",
+     "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
+     "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana",
+     "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York",
+     "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania",
+     "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah",
+     "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"]
+    return states
+
+
+def cn_state_abbreviations_list():
+    states = ['ZH', 'XI', 'HD', 'DB', 'HK','XN']
+    return states
+
+def cn_state_names_list():
+    states = ['Zhongnan', 'Xibei', 'Huadong', 'Dongbei', 'Hong Kong', 'Xinan']
+    return states
+
 
 def cn_state_convert():
     cn_state_abbrev = {

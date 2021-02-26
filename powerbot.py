@@ -3,6 +3,8 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
 from dotenv import load_dotenv
+import profile
+
 """Programmed by Egg"""
 
 load_dotenv()
@@ -13,8 +15,8 @@ client = discord.Client()
 pb = commands.Bot(command_prefix=['!', '.'])
 """The cogs to be loaded by the bot"""
 cogs = [
-        'profile',
-        'race_tracker'
+        'race_tracker',
+        'commands.profile'
 ]
 
 
@@ -32,5 +34,6 @@ if __name__ == '__main__':
             print(f"An error occurred: {e}")
             raise e
             pass
+
 
 pb.run(TOKEN)

@@ -1,12 +1,10 @@
 import discord
 from discord.ext import commands
 import os.path, time
-from discord.ext.commands import Bot
 import json
 import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-from common_functions import index_state, power_url, scrape, login_to_power, msgs
-from region_conversion import us_state_convert, cn_state_convert, us_state_abbreviations_list
+from common.common_functions import parse_state_parameters, power_url, scrape, msgs, parse_state_parameters
+from common.region_conversion import us_state_convert, us_state_abbreviations_list
 
 client = discord.Client()
 
@@ -206,23 +204,6 @@ def tally_seats(soup, index, intent="global"):
     return update_results
 
 
-def check_seat_count(country, bicameral=False):
-    seat_totals = {}
-    if bicameral is False:
-        index = index_state(country, "legislature")
-        regions = check_region[country]
-        for region in regions:
-            soup = scrape(f'{power_url}/state.php?state={region}')
-            seats = tally_seats(soup, index, intent="Global")
-            seat_totals[f"{country}"] = seats
-    else:
-        pass
-
-    embed = msgs(title=f"Parliamentary Elections in {country}!", message=f"{seat_totals}")
-    return embed
-
-
-
 class RaceTracker(commands.Cog):
 
     def __init__(self, bot):
@@ -234,13 +215,12 @@ class RaceTracker(commands.Cog):
 
     pb = commands.Bot(command_prefix=['!', '.'])
 
-    @pb.command(pass_context=True)
-    @commands.has_any_role("Strategist", "Bot Master", "Verified", "Politburo Member", "Internal Affairs Chair")
-    async def check_seat_count(self, ctx, region):
-        regions =  check_region(region)
-        embed = check_seat_count(region, bicameral=False)
-        ctx.send(embed=embed)
-
+    # @pb.command(pass_context=True)
+    # @commands.has_any_role("Strategist", "Bot Master", "Verified", "Politburo Member", "Internal Affairs Chair")
+    # async def check_seat_count(self, ctx, region):
+    #     regions =  check_region(region)
+    #     embed = check_seat_count(region, bicameral=False)
+    #     ctx.send(embed=embed)
 
     @pb.command(pass_context=True, aliases=["state"])
     @commands.has_any_role("Strategist", "Bot Master", "Verified", "Politburo Member", "Internal Affairs Chair")
@@ -264,7 +244,7 @@ class RaceTracker(commands.Cog):
 
     @pb.command(pass_context=True, aliases=["add"])
     @commands.has_any_role("Strategist", "Bot Master", "Verified", "Politburo Member", "Internal Affairs Chair")
-    async def add_state(self, ctx, state):
+    async def add_state(self, ctx, state, race=None):
         """Adds a state to the list of states being scraped, takes 20 full minutes or two ten minute update cycles to
         show results. Whichever comes sooner. """
         update_states(state)
@@ -292,17 +272,9 @@ class RaceTracker(commands.Cog):
             loaded_json = load_race_json(data_path)
             return loaded_json
 
-        def check_state_race_type(state, race):
-
-            def check_state(s):
-                us_states = us_state_abbreviations_list()
-                if s.lower() in  [x.lower() for x in us_states]:
-                    return race_index {
-                        "s1":
-                    }
-            race_index= check_state(state)
-            if race is not None:
-
+        race_index = parse_state_parameters(state, race)
+        if race_index <= 1:
+            raise Exception
 
         try:
             loaded_state_json = load_race_json(state)
