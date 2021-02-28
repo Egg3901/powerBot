@@ -16,7 +16,8 @@ pb = commands.Bot(command_prefix=['!', '.'])
 """The cogs to be loaded by the bot"""
 cogs = [
         'race_tracker',
-        'commands.profile'
+        'commands.profile',
+        'commands.update_roles'
 ]
 
 

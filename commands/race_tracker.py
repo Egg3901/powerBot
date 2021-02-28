@@ -148,23 +148,23 @@ def load_race_data(data_path):
 
 def update_states(state):
     """This function loads the json settings file, adds a state, and dumps the file back to json."""
-    with open('data/settings/settings.json', "r") as f:
+    with open('../data/settings/settings.json', "r") as f:
         settings_json = json.load(f)
     states_to_load = settings_json["states"]
     states_to_load.append(state)
     settings_json["states"] = states_to_load
-    with open('data/settings/settings.json', "w+") as f:
+    with open('../data/settings/settings.json', "w+") as f:
         json.dump(settings_json, f)
 
 
 def remove_states(state):
     """This function loads the json settings file, removes a state, and dumps the file back to json."""
-    with open('data/settings/settings.json', "r") as f:
+    with open('../data/settings/settings.json', "r") as f:
         settings_json = json.load(f)
     states_to_load = settings_json["states"]
     states_to_load.remove(state)
     settings_json["states"] = states_to_load
-    with open('data/settings/settings.json', "w+") as f:
+    with open('../data/settings/settings.json', "w+") as f:
         json.dump(settings_json, f)
 
 def parse_seat_count(soup, index):
@@ -226,7 +226,7 @@ class RaceTracker(commands.Cog):
     @commands.has_any_role("Strategist", "Bot Master", "Verified", "Politburo Member", "Internal Affairs Chair")
     async def states(self, ctx):
         """Retrieves a list of states being updated every 10 minutes, along with the race being scraped."""
-        with open('data/settings/settings.json', "r") as f:
+        with open('../data/settings/settings.json', "r") as f:
             settings = json.load(f)
         states_to_load = settings["states"]
         race = settings["race"]
@@ -259,7 +259,7 @@ class RaceTracker(commands.Cog):
         embed = discord.Embed(title="Remove state!", description=f"Succesfully removed the state {state}!", color=0x00bfff)
         await ctx.send(embed=embed)
 
-    @pb.command(pass_context=True,aliases=["ur", "upd", "check"])
+    @pb.command(pass_context=True, aliases=["ur", "upd", "check"])
     @commands.has_any_role("Strategist", "Bot Master", "Verified", "Politburo Member", "International Affairs Chair")
     async def update_race(self, ctx, state, race=None):
         """This command checks the status of a state's polling. The state must be in the tracking list and needs
@@ -270,7 +270,7 @@ class RaceTracker(commands.Cog):
         def load_race_json(filename):
             data_path = f'data/results/{filename}.json'
             loaded_json = load_race_json(data_path)
-            return loaded_json
+            return loaded_json, data_path
 
         race_index = parse_state_parameters(state, race)
         if race_index <= 1:
@@ -311,7 +311,7 @@ class RaceTracker(commands.Cog):
                                      ,
                                 inline=False)
                 n += 1
-            chart = discord.File("currentgraph.png", filename="currentgraph.png")
+            chart = discord.File("currentgraph.png", filename="../currentgraph.png")
             await ctx.send(embed=embed)
             await ctx.send(file=chart)
         except Exception as e:

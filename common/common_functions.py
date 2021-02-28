@@ -7,6 +7,8 @@ from tinydb import TinyDB, Query, where
 import json
 from datetime import datetime
 from dotenv import load_dotenv
+import sqlite3
+con = sqlite3.connect('./data/db.sqlite3')
 
 from common.region_conversion import us_state_abbreviations_list, us_state_names_list, us_state_convert, \
     cn_state_abbreviations_list, cn_state_convert, cn_state_names_list
@@ -17,7 +19,7 @@ power_url = "https://oppressive.games/power/"
 USER = os.getenv('USER')
 PASS = os.getenv('PASS')
 login_data = {'username': f'{USER}', 'password': f'{PASS}', "login": "true"}
-db = TinyDB('db.json')
+db = TinyDB('./data/db.json')
 now = datetime.now()
 date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
 
@@ -32,7 +34,10 @@ def load_settings():
 def register(user_id, power_id):
     print(str(user_id))
     table = db.table('users')
-    table.update({'discord_user': user_id, 'power_user': power_id})
+    try:
+        table.insert({'discord_user': user_id, 'power_user': power_id})
+    except Exception as e:
+        raise e
 
 
 def query(user_id):
